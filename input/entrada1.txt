@@ -1,1 +1,1 @@
-teste
+ var var teste = 2;
