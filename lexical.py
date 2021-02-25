@@ -6,8 +6,8 @@ palavraReservadaRegex = re.compile("^(var|const|typedef|struct|extends|procedure
 comentario_de_linha_regex = re.compile("^//.*")
 start_comentario_de_bloco_regex = re.compile("^/\*")
 end_comentario_de_bloco_regex = re.compile(".*\*/")
+itentificador_regex = re.compile("^([A-Za-z][\w|\d]*)")
 is_block_comment = False
-
 
 def main():
     inputs_diretory = "./input"
@@ -52,6 +52,11 @@ def identify_token(word, line_number, acumulated):
         regexMatch = list(filter(lambda x: x != "" and x != " ", palavraReservadaRegex.split(word)))
         if len(regexMatch) > 1:
             acumulated.append(formatter_token(line_number, "PRE", regexMatch[0]))
+            return identify_token("".join(regexMatch[1:]), line_number, acumulated)
+    elif itentificador_regex.search(word) != None:
+        regexMatch = list(filter(lambda x: x != "" and x != " ", itentificador_regex.split(word)))
+        if len(regexMatch) > 1:
+            acumulated.append(formatter_token(line_number, "IDE", regexMatch[0]))
             return identify_token("".join(regexMatch[1:]), line_number, acumulated)
 
 def formatter_token(line, token_type, token):

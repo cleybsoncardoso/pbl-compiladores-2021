@@ -2,4 +2,4 @@
 /*
 teste 
 */ var
-var var teste = 2;
+var var/*te*/teste = 2;
