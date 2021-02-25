@@ -1,1 +1,5 @@
- var var teste = 2;
+// comentario
+/*
+teste 
+*/ var
+var var teste = 2;

@@ -2,13 +2,19 @@ import sys
 import os
 import re
 
-palavraReservadaRegex = re.compile("^(var|const|typedef|struct|extends|procedure|function|start|return|if|else|then|while|read|print|int|real|boolean|string|true|false|global|local) ")
+palavraReservadaRegex = re.compile("^(var|const|typedef|struct|extends|procedure|function|start|return|if|else|then|while|read|print|int|real|boolean|string|true|false|global|local)( |\n)")
+comentario_de_linha_regex = re.compile("^//.*")
+start_comentario_de_bloco_regex = re.compile("^/\*")
+end_comentario_de_bloco_regex = re.compile(".*\*/")
+is_block_comment = False
+
 
 def main():
     inputs_diretory = "./input"
     output_diretory = "./output"
 
-    for input_file in os.listdir(inputs_diretory):
+    # for input_file in os.listdir(inputs_diretory):
+    for input_file in ['entrada1.txt']: 
         count_line = 0
         p = re.compile('entrada(\d+).txt')
         file_number = p.findall(input_file)[0]
@@ -25,6 +31,21 @@ def main():
                     output_file_stream.write(token)
 
 def identify_token(word, line_number, acumulated):
+    global is_block_comment
+
+    # checar comentarios
+    if is_block_comment or start_comentario_de_bloco_regex.search(word) != None:
+        is_block_comment = True
+        if end_comentario_de_bloco_regex.search(word) != None:
+            is_block_comment = False
+            regexMatch = list(filter(lambda x: x != "" and x != " ", end_comentario_de_bloco_regex.split(word)))
+            if len(regexMatch) >= 1:
+                return identify_token("".join(regexMatch), line_number, acumulated)
+        return
+    if comentario_de_linha_regex.search(word) != None:
+        return
+    # final de checar comentarios
+
     if word[0] == " ":
         return identify_token(word[1:], line_number, acumulated)
     if palavraReservadaRegex.search(word) != None:
