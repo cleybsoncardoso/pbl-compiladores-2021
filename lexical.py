@@ -7,6 +7,7 @@ comentario_de_linha_regex = re.compile("^//.*")
 start_comentario_de_bloco_regex = re.compile("^/\*")
 end_comentario_de_bloco_regex = re.compile(".*\*/")
 itentificador_regex = re.compile("^([A-Za-z][\w|\d]*)")
+separadores_regex = re.compile("( |\+|\-|\n|=|;)")
 is_block_comment = False
 
 def main():
@@ -32,7 +33,7 @@ def main():
 
 def identify_token(word, line_number, acumulated):
     global is_block_comment
-
+    print(separadores_regex.split(word))
     # checar comentarios
     if is_block_comment or start_comentario_de_bloco_regex.search(word) != None:
         is_block_comment = True
