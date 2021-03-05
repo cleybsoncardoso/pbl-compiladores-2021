@@ -7,7 +7,19 @@ comentario_de_linha_regex = re.compile("^//.*")
 start_comentario_de_bloco_regex = re.compile("^/\*")
 end_comentario_de_bloco_regex = re.compile(".*\*/")
 itentificador_regex = re.compile("^([A-Za-z][\w|\d]*)")
+start_cadeia_de_caracter_regex = re.compile("^(\")")
+# TODO: Precisa ver a questão de caracter duplo usando \"
+inside_cadeia_de_caracter_regex = re.compile("([A-Za-z|\w|\x20-\x21|\x23-\x7E]*)")
+end_cadeia_de_caracter_regex = re.compile("^(\")")
+
+# variaveis de controle
 is_block_comment = False
+is_block_catacteres = False
+caracteres_acumulated = ""
+
+# variaveis globais
+erros = []
+
 
 def main():
     inputs_diretory = "./input"
@@ -32,6 +44,8 @@ def main():
 
 def identify_token(word, line_number, acumulated):
     global is_block_comment
+    global is_block_catacteres
+    global caracteres_acumulated
 
     # checar comentarios
     if is_block_comment or start_comentario_de_bloco_regex.search(word) != None:
@@ -46,6 +60,20 @@ def identify_token(word, line_number, acumulated):
         return
     # final de checar comentarios
 
+    # checar caracteres
+    if is_block_catacteres:
+        if end_cadeia_de_caracter_regex.search(word[0]):
+            acumulated.append(formatter_token(line_number, "CDC", caracteres_acumulated))
+            is_block_catacteres = False
+            return identify_token(word[1:], line_number, acumulated)
+        if inside_cadeia_de_caracter_regex.search(word):
+            regexMatch = list(filter(lambda x: x != "", inside_cadeia_de_caracter_regex.split(word)))
+            caracteres_acumulated += regexMatch[0]
+            if len(regexMatch) > 1:
+                return identify_token("".join(regexMatch[1:]), line_number, acumulated)
+            else:
+                return
+
     if word[0] == " ":
         return identify_token(word[1:], line_number, acumulated)
     if palavraReservadaRegex.search(word) != None:
@@ -58,6 +86,11 @@ def identify_token(word, line_number, acumulated):
         if len(regexMatch) > 1:
             acumulated.append(formatter_token(line_number, "IDE", regexMatch[0]))
             return identify_token("".join(regexMatch[1:]), line_number, acumulated)
+    elif start_cadeia_de_caracter_regex.search(word) != None:
+        regexMatch = list(filter(lambda x: x != "" and x != " ", start_cadeia_de_caracter_regex.split(word)))
+        is_block_catacteres = True
+        caracteres_acumulated = ""
+        return identify_token("".join(regexMatch[1:]), line_number, acumulated)
 
 def formatter_token(line, token_type, token):
     return str(line) + " " + token_type + " " + token + "\n"
