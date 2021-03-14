@@ -1,7 +1,5 @@
-// comentario
-/*
-teste 
-*/ var
-var
-var/*te*/teste = 2;
-"test@dsddsadasdasas"
+if(a > 2) {
+    tes = 2;
+}
+/*dsd*/
+/*dsds
