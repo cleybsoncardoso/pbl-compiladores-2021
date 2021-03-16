@@ -71,7 +71,7 @@ def identify_token(word, line_number, acumulated):
         is_block_comment = True
         if start_comentario_de_bloco_regex.search(word) != None:
             regexMatch = list(filter(lambda x: x != "" and x != " ", start_comentario_de_bloco_regex.split(word)))
-            comentario_error = formatter_token(line_number, "CMF", regexMatch[0])
+            comentario_error = formatter_token(line_number, "CONF", regexMatch[0])
         if end_comentario_de_bloco_regex.search(word) != None:
             is_block_comment = False
             regexMatch = list(filter(lambda x: x != "" and x != " ", end_comentario_de_bloco_regex.split(word)))
@@ -102,7 +102,7 @@ def identify_token(word, line_number, acumulated):
             return
     elif cadeia_de_caracter_regex.search(word) != None:
         regexMatch = list(filter(lambda x: x != "" and x != " ", cadeia_de_caracter_regex.split(word)))
-        acumulated.append(formatter_token(line_number, "CDC", regexMatch[0]))
+        acumulated.append(formatter_token(line_number, "CAD", regexMatch[0]))
         if len(regexMatch) > 1:
             return identify_token("".join(regexMatch[1:]), line_number, acumulated)
         else:
@@ -117,21 +117,21 @@ def identify_token(word, line_number, acumulated):
             return
     elif operadores_aritmeticos_regex.search(word) != None:
         regexMatch = list(filter(lambda x: x != "" and x != " ", operadores_aritmeticos_regex.split(word)))
-        acumulated.append(formatter_token(line_number, "OPA", regexMatch[0]))
+        acumulated.append(formatter_token(line_number, "ART", regexMatch[0]))
         if len(regexMatch) > 1:
             return identify_token("".join(regexMatch[1:]), line_number, acumulated)
         else:
             return
     elif operadores_relacionais_regex.search(word) != None:
         regexMatch = list(filter(lambda x: x != "" and x != " ", operadores_relacionais_regex.split(word)))
-        acumulated.append(formatter_token(line_number, "OPR", regexMatch[0]))
+        acumulated.append(formatter_token(line_number, "REL", regexMatch[0]))
         if len(regexMatch) > 1:
             return identify_token("".join(regexMatch[1:]), line_number, acumulated)
         else:
             return
     elif operadores_logicos_regex.search(word) != None:
         regexMatch = list(filter(lambda x: x != "" and x != " ", operadores_logicos_regex.split(word)))
-        acumulated.append(formatter_token(line_number, "OPL", regexMatch[0]))
+        acumulated.append(formatter_token(line_number, "LOG", regexMatch[0]))
         if len(regexMatch) > 1:
             return identify_token("".join(regexMatch[1:]), line_number, acumulated)
         else:
@@ -157,7 +157,7 @@ def checkErrors(word, line_number, acumulated):
             return identify_token("".join(regexMatch[1:]), line_number, acumulated)
     elif simbolo_erro_regex.search(word) != None:
         regexMatch = list(filter(lambda x: x != "" and x != " ", simbolo_erro_regex.split(word)))
-        acumulated.append(formatter_token(line_number, "SMF", regexMatch[0]))
+        acumulated.append(formatter_token(line_number, "SIB", regexMatch[0]))
         if len(regexMatch) > 1:
             return identify_token("".join(regexMatch[1:]), line_number, acumulated)
 
