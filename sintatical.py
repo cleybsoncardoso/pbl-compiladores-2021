@@ -4,7 +4,6 @@ import os
 import re
 
 separeteTokens = re.compile("(\d*) (\w*) (.*)")
-declarationsType = ["real", "boolean", "int", "string"]
 
 tokens = []
 errors = []
@@ -69,6 +68,9 @@ def global_declarations():
         declaration_var()
       elif currentToken["value"] == "struct":
         declaration_struct()
+      elif currentToken["value"] == "procedure":
+        prox_token()
+        declaration_procedure()
       else:
         prox_token()
     else:
@@ -93,7 +95,7 @@ def declaration_const():
 def atribuition_const():
   if currentToken["value"] == "}":
     return True
-  if currentToken["value"] in declarationsType:
+  if check_declaration_type():
     prox_token()
     if atribuition_value():
       atribuition_const()
@@ -130,17 +132,19 @@ def declaration_var():
   if currentToken["value"] == "{":
     prox_token()
     if currentToken["value"] != "}":
-      if atribuition_var():
-        print("declarou Variavel")
-      else:
-        print("erro: Declarar Variavel " + currentToken["value"] + " linha:" + currentToken["line"])
+      atribuition_var()
+    # if currentToken["value"] != "}":
+    #   if atribuition_var():
+    #     print("declarou Variavel")
+    #   else:
+    #     print("erro: Declarar Variavel " + currentToken["value"] + " linha:" + currentToken["line"])
   if currentToken["value"] == "}":
     prox_token()
 
 def atribuition_var():
   if currentToken["value"] == "}":
     return True
-  if currentToken["value"] in declarationsType:
+  if check_declaration_type():
     prox_token()
     if atribuition_value_optional():
       atribuition_var()
@@ -175,6 +179,148 @@ def atribuition_value_optional():
   return False
 
 
+#################### procedure #######################################################
+
+def declaration_procedure():
+  if currentToken["type"] == "IDE":
+    prox_token()
+    if currentToken["value"] == "(":
+      prox_token()
+      if declaration_params():
+        prox_token()
+        if currentToken["value"] == "{":
+          prox_token()
+          declaration_bodyFunction(False)
+
+
+def declaration_bodyFunction(can_return):
+  if currentToken["value"] == "var":
+    prox_token()
+    declaration_var()
+  else:
+    assign()
+  if not can_return:
+    if currentToken["value"] != "}":
+      declaration_bodyFunction(can_return)
+  else:
+    if currentToken["value"] != "}" or currentToken["value"] != "return":
+      declaration_bodyFunction(can_return)
+    print(currentToken)
+
+def global_local():
+  if currentToken["type"] == "PRE":
+    if currentToken["value"] == "global" or currentToken["value"] == "local":
+      prox_token()
+      if currentToken["value"] == ".":
+        prox_token()
+      else:
+        return False
+  return True
+
+def expression():
+  if global_local():
+    term()
+    add_expression()
+
+def term():
+  expression_value()
+  multi_expression()
+
+def expression_value():
+  if currentToken["value"] == "-":
+    prox_token()
+    return expression_value()
+  elif currentToken["type"] in ["IDE", "NRO", "CAD"] or currentToken["value"] in ["false", "true"]:
+    prox_token()
+    return True
+  elif currentToken["value"] == "(":
+    prox_token()
+    if expression():
+      if currentToken["value"] == ")":
+        prox_token()
+        return True
+      else:
+        startErrorState("erro ao declarar expressao na linha " + currentToken["line"] +"\n")
+        return False
+    else:
+      startErrorState("erro ao declarar expressao na linha " + currentToken["line"] +"\n")
+      return False
+  elif function_call():
+    return True
+  else:
+    return False
+
+def function_call():
+  if currentToken["type"] == "IDE":
+    prox_token()
+    if currentToken["value"] == "(":
+      argument_list()
+      if(currentToken["value"] == ")"):
+        prox_token()
+        return True
+      else:
+        startErrorState("erro ao declarar chamada de função na linha " + currentToken["line"] +"\n")
+        return False
+    else:
+      startErrorState("erro ao declarar chamada de função na linha " + currentToken["line"] +"\n")
+      return False
+  else:
+    startErrorState("erro ao declarar chamada de função na linha " + currentToken["line"] +"\n")
+    return False
+
+def argument_list():
+  if currentToken["type"] == "IDE":
+    if(expression()):
+      if currentToken["value"] == ",":
+        prox_token()
+        return argument_list()
+  prox_token()
+  return True
+
+def multi_expression():
+  if currentToken["value"] == "*" or currentToken["value"] == "/":
+    return term()
+  else:
+    return True
+
+def add_expression():
+  if currentToken["value"] == "+" or currentToken["value"] == "-":
+    return expression()
+  else:
+    return True
+
+def assign():
+  if not global_local():
+    return False
+
+  if currentToken["type"] == "IDE":
+    prox_token()
+    if currentToken["value"] == "=":
+      prox_token()
+      expression()
+    elif currentToken["value"] == "[":
+      
+  if currentToken["value"] == ";":
+    prox_token()
+  else:
+    startErrorState("erro em atribuicao na linha " + currentToken["line"] +"\n")
+    return False
+
+def declaration_vector():
+  if currentToken["value"] == "[":
+    prox_token()
+    if currentToken["type"] in ["IDE", "NRO"]:
+      prox_token()
+      if currentToken["value"] == "]":
+        prox_token()
+        return True
+      else:
+        startErrorState("erro ao declarar vector na linha " + currentToken["line"] +"\n")
+        return False
+    else:
+      startErrorState("erro ao acessar vector na linha " + currentToken["line"] +"\n")
+      return False
+  return False
 
 #################### struct detection ################################################
 
@@ -191,6 +337,34 @@ def declaration_struct():
 
 
 #################### General Functions ###################################################
+
+def check_declaration_type():
+  declarationsType = ["real", "boolean", "int", "string"]
+  if currentToken["value"] in declarationsType or currentToken["type"] == "IDE":
+    return True
+  elif currentToken["value"] == "struct":
+    prox_token()
+    if currentToken["type"] == "IDE":
+      prox_token()
+      return True
+  return False
+
+def declaration_params():
+  if currentToken["value"] == ")":
+    return True
+  if currentToken["value"] == "const":
+    prox_token()
+  if check_declaration_type():
+    prox_token()
+    if currentToken["type"] == "IDE":
+      prox_token()
+      if currentToken["value"] == ",":
+        prox_token()
+      return declaration_params()
+    startErrorState("erro ao declarar paramentos em função/procedure na linha " + currentToken["line"] +"\n")
+    return False
+  startErrorState("erro ao declarar paramentos em função/procedure na linha " + currentToken["line"] +"\n")
+  return False
 
 def errorState():
   finalDelimitate = [";", "}"]
@@ -211,7 +385,7 @@ def checkValues():
 
 def declaration_variable():
   if currentToken["value"] != "}":
-    if currentToken["value"] in declarationsType:
+    if check_declaration_type():
       prox_token()
       if currentToken["type"] == "IDE":
         prox_token()

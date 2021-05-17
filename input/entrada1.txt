@@ -153,5 +153,5 @@ function boolean ligado(boolean ligado, string nome, int ano){
     return true;
 }
 
-typedef struct Uno extends Carro{
+typedef struct Uno extends Carro {
 }
