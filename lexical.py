@@ -1,3 +1,4 @@
+# Cleybson Cardoso Leite e José Ricardo Nogueira Magalhães
 import sys
 import os
 import re
@@ -12,7 +13,6 @@ operadores_aritmeticos_regex = re.compile("^([\+\+]{2}|[\-\-]{2}|[\+|\-|\-|\*|\/
 operadores_relacionais_regex = re.compile("^([==|!=|>=|<=]{2}|[>|<|=])")
 operadores_logicos_regex = re.compile("^(&&|\|\||!)")
 demilitadores_regex = re.compile("^([;|,|(|)|{|}|\[|\]|\.])")
-# TODO: Precisa ver a questão de caracter duplo usando \"
 cadeia_de_caracter_regex = re.compile("^(\"[A-Za-z|\w|\x20-\x21|\x23-\x7E]*\")")
 
 # variaveis de controle
@@ -32,7 +32,7 @@ def main():
     global is_block_comment
     global hasError
     inputs_diretory = "./input"
-    output_diretory = "./output"
+    output_diretory = "./output_lexical"
 
     for input_file in os.listdir(inputs_diretory):
     # for input_file in ['entrada2.txt']:
@@ -40,8 +40,8 @@ def main():
         p = re.compile('entrada(\d+).txt')
         file_number = p.findall(input_file)[0]
 
-        if not os.path.isdir('./output'):
-            os.mkdir('./output')
+        if not os.path.isdir('./output_lexical'):
+            os.mkdir('./output_lexical')
 
         with open((inputs_diretory+"/"+input_file), "r") as input_file_stream, open((output_diretory+"/saida"+file_number+".txt"), "w") as output_file_stream:
             for line in input_file_stream:
