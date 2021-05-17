@@ -7,6 +7,7 @@ separeteTokens = re.compile("(\d*) (\w*) (.*)")
 declarationsType = ["real", "boolean", "int", "string"]
 
 tokens = []
+errors = []
 currentToken = None
 
 def main():
@@ -25,6 +26,15 @@ def main():
     with open((inputs_diretory+"/"+input_file), "r") as input_file_stream:
       convert_tokens(input_file_stream)
     analise()
+
+    if len(errors) > 0:
+      with open((output_diretory+"/saida"+file_number+".txt"), "w") as output_file_stream:
+        for error in errors:
+          output_file_stream.write(error)
+    else:
+      with open((output_diretory+"/saida"+file_number+".txt"), "w") as output_file_stream:
+        output_file_stream.write("Sucesso")
+
 
 def convert_tokens(fileTokens):
   global tokens
@@ -47,43 +57,150 @@ def analise():
   prox_token()
   if(currentToken != None):
     global_declarations()
-    analise()
 
 
 def global_declarations():
-  if currentToken["type"] == "PRE":
-    if currentToken["value"] == "const":
-      declaration_const()
+  if currentToken != None:
+    if currentToken["type"] == "PRE":
+      if currentToken["value"] == "const":
+        declaration_const()
+      elif currentToken["value"] == "var":
+        prox_token()
+        declaration_var()
+      elif currentToken["value"] == "struct":
+        declaration_struct()
+      else:
+        prox_token()
+    else:
+      prox_token()
+    global_declarations()
 
 
+
+################# const ##############################
 
 def declaration_const():
-    if prox_token()["value"] == "{":
-      prox_token()
-      if currentToken["value"] != "}":
-          if atribuition_const():
-            print(currentToken)
+  if prox_token()["value"] == "{":
+    prox_token()
+    if currentToken["value"] != "}":
+      if atribuition_const():
+        print("declarou Constante")
+      else:
+        print("erro: Declarar Constante")
+  if currentToken["value"] == "}":
+    prox_token()
 
 def atribuition_const():
   if currentToken["value"] == "}":
     return True
   if currentToken["value"] in declarationsType:
     prox_token()
-    if currentToken["type"] == "IDE":
+    if atribuition_value():
+      atribuition_const()
+    if currentToken["value"] == ";":
+      prox_token()
+      atribuition_const()
+      return True
+  return False
+
+
+def atribuition_value():
+  if currentToken["type"] == "IDE":
       prox_token()
       if currentToken["value"] == "=":
         prox_token()
-      if checkValues():
-        prox_token()
+        if checkValues():
+          prox_token()
+          if currentToken["value"] == ",":
+            prox_token()
+            atribuition_value()
+          elif currentToken["value"] == ";":
+            return True
+          return False
       if currentToken["value"] == ",":
         prox_token()
-        atribuition_const()
-      if currentToken["value"] == ";":
-        prox_token()
-        atribuition_const()
-  print(currentToken)
+        atribuition_value()
+  startErrorState("erro ao declarar constante na linha " + currentToken["line"] +"\n")
   return False
 
+
+################# var ##############################
+
+def declaration_var():
+  if currentToken["value"] == "{":
+    prox_token()
+    if currentToken["value"] != "}":
+      if atribuition_var():
+        print("declarou Variavel")
+      else:
+        print("erro: Declarar Variavel " + currentToken["value"] + " linha:" + currentToken["line"])
+  if currentToken["value"] == "}":
+    prox_token()
+
+def atribuition_var():
+  if currentToken["value"] == "}":
+    return True
+  if currentToken["value"] in declarationsType:
+    prox_token()
+    if atribuition_value_optional():
+      atribuition_var()
+      return True
+  return False
+
+def atribuition_value_optional():
+  if currentToken["type"] == "IDE":
+      prox_token()
+      if currentToken["value"] == "=":
+        prox_token()
+        if checkValues():
+          prox_token()
+          if currentToken["value"] == ",":
+            prox_token()
+            if atribuition_value_optional():
+              return True
+          elif currentToken["value"] == ";":
+            prox_token()
+            return True
+      elif currentToken["value"] == ",":
+        prox_token()
+        if atribuition_value_optional():
+          return True
+      elif currentToken["value"] == ";":
+        prox_token()
+        return True
+  elif currentToken["value"] == ";":
+    prox_token()
+    return True
+  startErrorState("erro ao declarar variavel na linha " + currentToken["line"] +"\n")
+  return False
+
+
+
+#################### struct detection ################################################
+
+def declaration_struct():
+  if prox_token()["type"] == "IDE":
+    prox_token()
+    if currentToken["value"] == "extends":
+      prox_token()
+      if currentToken["type"] == "IDE":
+        prox_token()
+      else:
+        startErrorState("erro ao declarar struct na linha " + currentToken["line"] +"\n")
+    declaration_var()
+
+
+#################### General Functions ###################################################
+
+def errorState():
+  finalDelimitate = [";", "}"]
+  if currentToken["value"] not in finalDelimitate:
+    prox_token()
+
+def startErrorState(messageError):
+  global errors
+  errors.append(messageError)
+  errorState()
 
 def checkValues():
   possibleValue = ["false", "true"]

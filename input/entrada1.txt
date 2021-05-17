@@ -1,7 +1,7 @@
 const{
-    real a, b, c = 3;
+    real a = 2, b = 4, c = 3;
     boolean teste = false;
-    int x;
+    int x = 4;
 }
 var {
     real a, b, c = 3;
@@ -9,12 +9,10 @@ var {
     int x;
 }
 struct Carro{
-    var{
     string placa;
     string modelo;
     int qtd_portas, qtd_valvulas;
     real velocidade_max = 125.0;
-    }
 }
 procedure acelerar(real velocidade){
     var{
@@ -104,12 +102,10 @@ start(){
 }
 
 struct Carro{
-    var{
-        string placa;
-        string modelo;
-        int qtd_portas, qtd_valvulas;
-        real velocidade_max = 125.0;
-    }
+    string placa;
+    string modelo;
+    int qtd_portas, qtd_valvulas;
+    real velocidade_max = 125.0;
 }
 
 procedure acelerar(real velocidade){
