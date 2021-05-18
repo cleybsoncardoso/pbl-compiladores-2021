@@ -37,7 +37,7 @@ procedure acelerar(real velocidade){
     vetor1[1] = 10;
     vetor2[b] = { b, j };
     vetor2[b] = { b };
-    if(b > c && c > a && a > b)then{
+    if(b > c || c > a && a > b)then{
         carro.velocidade = 200;
         if(carro.placa == "jjj")then{
             carro.modelo = "xesquedele";

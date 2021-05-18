@@ -230,7 +230,7 @@
 40 IDE b
 40 REL >
 40 IDE c
-40 LOG &&
+40 LOG ||
 40 IDE c
 40 REL >
 40 IDE a

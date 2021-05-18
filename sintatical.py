@@ -11,7 +11,7 @@ itentificador_regex = re.compile("^([A-Za-z][\w|\d]*)")
 numero_regex = re.compile("^(\d+\.?\d+|\d)")
 operadores_aritmeticos_regex = re.compile("^([\+\+]{2}|[\-\-]{2}|[\+|\-|\-|\*|\/|\+]{1})")
 operadores_relacionais_regex = re.compile("^([==|!=|>=|<=]{2}|[>|<|=])")
-operadores_logicos_regex = re.compile("^(&&|\|\||!)")
+operadores_logicos_regex = re.compile("^(&&|\|\||!(?!=))")
 demilitadores_regex = re.compile("^([;|,|(|)|{|}|\[|\]|\.])")
 cadeia_de_caracter_regex = re.compile("^(\"[A-Za-z|\w|\x20-\x21|\x23-\x7E]*\")")
 
@@ -127,6 +127,13 @@ def identify_token(word, line_number, acumulated):
             return identify_token("".join(regexMatch[1:]), line_number, acumulated)
         else:
             return
+    elif operadores_logicos_regex.search(word) != None:
+        regexMatch = list(filter(lambda x: x != "" and x != " ", operadores_logicos_regex.split(word)))
+        acumulated.append(formatter_token(line_number, "LOG", regexMatch[0]))
+        if len(regexMatch) > 1:
+            return identify_token("".join(regexMatch[1:]), line_number, acumulated)
+        else:
+            return
     elif operadores_aritmeticos_regex.search(word) != None:
         regexMatch = list(filter(lambda x: x != "" and x != " ", operadores_aritmeticos_regex.split(word)))
         acumulated.append(formatter_token(line_number, "ART", regexMatch[0]))
@@ -137,13 +144,6 @@ def identify_token(word, line_number, acumulated):
     elif operadores_relacionais_regex.search(word) != None:
         regexMatch = list(filter(lambda x: x != "" and x != " ", operadores_relacionais_regex.split(word)))
         acumulated.append(formatter_token(line_number, "REL", regexMatch[0]))
-        if len(regexMatch) > 1:
-            return identify_token("".join(regexMatch[1:]), line_number, acumulated)
-        else:
-            return
-    elif operadores_logicos_regex.search(word) != None:
-        regexMatch = list(filter(lambda x: x != "" and x != " ", operadores_logicos_regex.split(word)))
-        acumulated.append(formatter_token(line_number, "LOG", regexMatch[0]))
         if len(regexMatch) > 1:
             return identify_token("".join(regexMatch[1:]), line_number, acumulated)
         else:
