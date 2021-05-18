@@ -1,0 +1,142 @@
+const{
+    real a = 2, b = 4, c = 3;
+    boolean teste = false;
+    int x = 4;
+    int a[1] = {2, 3};
+}
+var {
+    real a, b, c = 3;
+    boolean teste = false;
+    int x;
+    int a[1] = {2, 3};
+    int a[1][2] = 2;
+    int a[1];
+    int a[1][2];
+}
+struct Carro{
+    string placa;
+    string modelo;
+    int qtd_portas, qtd_valvulas;
+    real velocidade_max = 125.0;
+}
+procedure acelerar(real velocidade){
+    var{
+        real a, b, c = 3;
+        boolean teste = false;
+        int x;
+        struct Carro carro;
+    }
+    global.a = 12;
+    local.a = 15;
+    b = 18;
+    j = "hello";
+    vetor1[1];
+    vetor1[1][2];
+    vetor1[1][2] = b;
+    vetor1[1][b] = 5;
+    vetor1[1] = 10;
+    vetor2[b] = { b, j };
+    vetor2[b] = { b };
+    if(b > c && c > a && a > b)then{
+        carro.velocidade = 200;
+        if(carro.placa == "jjj")then{
+            carro.modelo = "xesquedele";
+        }else{
+            ligado(c, 5+2, "bom dia", true);
+        }
+    }
+    acelerar(x);
+
+    while(b > c && c > a && a > b){
+        carro.velocidade = 200;
+        while(carro.placa == "jjj"){
+            carro.modelo = "xesquedele";
+        }
+        while(true){
+            ligado(c, 5+2, "bom dia", true);
+            print("loop inf", a, a+b, 2+a, acelerar(x), acelerar(x) + j);
+            read(a);
+        }
+    }
+}
+
+function boolean ligado(boolean ligado, string nome, int ano){
+    var{
+        real a, b, c = 3;
+        boolean teste = false;
+        int x;
+        struct Carro carro;
+    }
+    b = 18;
+    c = -3;
+    j = "hello";
+    if(b > c && c <= a && a != b)then{
+        carro.velocidade = 200;
+        if(carro.placa == "jjj")then{
+            carro.modelo = "xesquedele";
+        } else {
+            ligado(c, 5+2, "bom dia", true);
+        }
+    }
+    acelerar(x);
+    return true;
+}
+
+typedef struct Uno extends Carro{
+}
+
+
+struct Carro{
+    string placa;
+    string modelo;
+    int qtd_portas, qtd_valvulas;
+    real velocidade_max = 125.0;
+}
+
+procedure acelerar(real velocidade){
+    var{
+        real a, b, c = 3;
+        boolean teste = false;
+        int x;
+        struct Carro carro;
+    }
+    global.a = 12;
+    local.a = 15;
+    b = 18;
+    j = "hello";
+    if(b > c && c > a && a > b)then{
+        carro.velocidade = 200;
+        if(carro.placa == "jjj")then{
+            carro.modelo = "xesquedele";
+        }else{
+            ligado(c, 5+2, "bom dia", true);
+        }
+    }
+    acelerar(x);
+}
+
+function boolean ligado(boolean ligado, string nome, int ano){
+    var{
+        real a, b, c = 3;
+        boolean teste = false;
+        int x;
+        struct Carro carro;
+    }
+    global.a = 12;
+    local.a = 15;
+    b = 18;
+    j = "hello";
+    if(b > c && c <= a && a != b)then{
+        carro.velocidade = 200;
+        if(carro.placa == "jjj")then{
+            carro.modelo = "xesquedele";
+        }else{
+            ligado(c, 5+2, "bom dia", true);
+        }
+    }
+    acelerar(x);
+    return true;
+}
+
+typedef struct Uno extends Carro {
+}
