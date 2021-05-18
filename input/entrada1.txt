@@ -47,9 +47,9 @@ procedure acelerar(real velocidade){
     }
     acelerar(x);
 
-    while(b > c && c > a && a > b)then{
+    while(b > c && c > a && a > b){
         carro.velocidade = 200;
-        while(carro.placa == "jjj")then{
+        while(carro.placa == "jjj"){
             carro.modelo = "xesquedele";
         }
         while(true){

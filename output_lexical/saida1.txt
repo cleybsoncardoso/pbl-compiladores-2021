@@ -300,7 +300,6 @@
 50 REL >
 50 IDE b
 50 DEL )
-50 PRE then
 50 DEL {
 51 IDE carro
 51 DEL .
@@ -316,7 +315,6 @@
 52 REL ==
 52 CAD "jjj"
 52 DEL )
-52 PRE then
 52 DEL {
 53 IDE carro
 53 DEL .
