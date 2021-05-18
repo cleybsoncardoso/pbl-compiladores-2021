@@ -15,7 +15,6 @@ def main():
 
   for input_file in os.listdir(inputs_diretory):
   # for input_file in ['entrada2.txt']:
-    count_line = 0
     p = re.compile('saida(\d+).txt')
     file_number = p.findall(input_file)[0]
 
@@ -217,6 +216,10 @@ def declaration_bodyFunction(can_return):
   if currentToken["value"] == "var":
     prox_token()
     declaration_var()
+  elif currentToken["value"] == "if":
+    declaration_if(can_return)
+  elif currentToken["value"] == "while":
+    declaration_while(can_return)
   else:
     assign()
   if not can_return:
@@ -225,7 +228,6 @@ def declaration_bodyFunction(can_return):
   else:
     if currentToken["value"] != "}" or currentToken["value"] != "return":
       declaration_bodyFunction(can_return)
-    print(currentToken)
 
 def global_local():
   if currentToken["type"] == "PRE":
@@ -250,7 +252,17 @@ def expression_value():
   if currentToken["value"] == "-":
     prox_token()
     return expression_value()
-  elif currentToken["type"] in ["IDE", "NRO", "CAD"] or currentToken["value"] in ["false", "true"]:
+  elif currentToken["type"] == "IDE":
+    prox_token()
+    if currentToken["value"] == ".":
+      prox_token()
+      if currentToken["type"] == "IDE":
+        prox_token()
+      else:
+        startErrorState("erro ao acessar struct na expressao da linha " + currentToken["line"] +"\n")
+        return False
+    return True
+  elif currentToken["type"] in ["NRO", "CAD"] or currentToken["value"] in ["false", "true"]:
     prox_token()
     return True
   elif currentToken["value"] == "(":
@@ -289,22 +301,22 @@ def function_call():
     return False
 
 def argument_list():
-  if currentToken["type"] == "IDE":
-    if(expression()):
-      if currentToken["value"] == ",":
-        prox_token()
-        return argument_list()
-  prox_token()
+  expression()
+  if currentToken["value"] == ",":
+    prox_token()
+    return argument_list()
   return True
 
 def multi_expression():
   if currentToken["value"] == "*" or currentToken["value"] == "/":
+    prox_token()
     return term()
   else:
     return True
 
 def add_expression():
   if currentToken["value"] == "+" or currentToken["value"] == "-":
+    prox_token()
     return expression()
   else:
     return True
@@ -315,6 +327,11 @@ def assign():
 
   if currentToken["type"] == "IDE":
     prox_token()
+    if currentToken["value"] == ".":
+      prox_token()
+      if currentToken["type"] == "IDE":
+        prox_token()
+
     if currentToken["value"] == "=":
       prox_token()
       expression()
@@ -323,6 +340,16 @@ def assign():
         matrix_assign()
       else:
         vector_assign()
+
+    if currentToken["value"] == "(":
+      prox_token()
+      argument_list()
+      if(currentToken["value"] == ")"):
+        prox_token()
+        return True
+      else:
+        startErrorState("erro ao declarar chamada de função na linha " + currentToken["line"] +"\n")
+        return False
 
   if currentToken["value"] == ";":
     prox_token()
@@ -414,6 +441,96 @@ def declaration_struct():
     declaration_var()
 
 
+
+#################### conditional #########################################################
+def declaration_if(can_return):
+  if currentToken["value"] == "if":
+    prox_token()
+    if currentToken["value"] == "(":
+      prox_token()
+      declaration_conditional_expression()
+      if(currentToken["value"] == ")"):
+        prox_token()
+        if declaration_then(can_return):
+          if currentToken["value"] == "else":
+            prox_token()
+            declaration_then_body(can_return)
+          return True
+        else:
+          return False
+      else:
+        startErrorState("erro ao declarar 'if' na linha " + currentToken["line"] +"\n")
+        return False
+    else:
+      startErrorState("erro ao declarar 'if' na linha " + currentToken["line"] +"\n")
+      return False
+
+def declaration_conditional_expression():
+  if currentToken["value"] == "!":
+    if not global_local():
+      return False
+    prox_token()
+    if currentToken["type"] == "IDE":
+      prox_token()
+      if declaration_vector():
+        declaration_vector()
+  elif isAtribuivel():
+    expression()
+    if currentToken["type"] == "REL":
+      prox_token()
+      expression()
+  if currentToken["type"] == "LOG":
+    prox_token()
+    return declaration_conditional_expression()
+  elif currentToken["value"] == ")":
+    return True
+  else:
+    startErrorState("erro na condicional da linha " + currentToken["line"] +"\n")
+    return False
+
+def declaration_then(can_return):
+  if currentToken["value"] == "then":
+    prox_token()
+    return declaration_then_body(can_return)
+  else:
+    startErrorState("erro na condicional da linha " + currentToken["line"] +"\n")
+    return False
+
+def declaration_then_body(can_return):
+  if currentToken["value"] == "{":
+    prox_token()
+    declaration_bodyFunction(can_return)
+    if currentToken["value"] == "}":
+      prox_token()
+      return True
+    else:
+      startErrorState("erro na condicional da linha " + currentToken["line"] +"\n")
+      return False
+  else:
+    startErrorState("erro na condicional da linha " + currentToken["line"] +"\n")
+    return False
+
+
+#################### while function ##################################################
+def declaration_while(can_return):
+  if currentToken["value"] == "while":
+    prox_token()
+    if currentToken["value"] == "(":
+      prox_token()
+      declaration_conditional_expression()
+      if(currentToken["value"] == ")"):
+        prox_token()
+        if declaration_then_body(can_return):
+          return True
+        else:
+          return False
+      else:
+        startErrorState("erro ao declarar 'if' na linha " + currentToken["line"] +"\n")
+        return False
+    else:
+      startErrorState("erro ao declarar 'if' na linha " + currentToken["line"] +"\n")
+      return False
+
 #################### General Functions ###################################################
 
 def check_declaration_type():
@@ -457,6 +574,13 @@ def startErrorState(messageError):
 def checkValues():
   possibleValue = ["false", "true"]
   possibleType = ["NRO", "CAD"]
+  if currentToken["value"] in possibleValue or currentToken["type"] in possibleType:
+    return True
+  return False
+
+def isAtribuivel():
+  possibleValue = ["false", "true"]
+  possibleType = ["NRO", "CAD", "IDE"]
   if currentToken["value"] in possibleValue or currentToken["type"] in possibleType:
     return True
   return False
