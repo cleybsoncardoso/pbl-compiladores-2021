@@ -2,11 +2,16 @@ const{
     real a = 2, b = 4, c = 3;
     boolean teste = false;
     int x = 4;
+    int a[1] = {2, 3};
 }
 var {
     real a, b, c = 3;
     boolean teste = false;
     int x;
+    int a[1] = {2, 3};
+    int a[1][2] = 2;
+    int a[1];
+    int a[1][2];
 }
 struct Carro{
     string placa;

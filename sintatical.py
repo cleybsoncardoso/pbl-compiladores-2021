@@ -109,7 +109,17 @@ def atribuition_const():
 def atribuition_value():
   if currentToken["type"] == "IDE":
       prox_token()
-      if currentToken["value"] == "=":
+      if declaration_vector():
+        if declaration_vector():
+          matrix_assign()
+        else:
+          vector_assign()
+        if currentToken["value"] == ",":
+          prox_token()
+          atribuition_value()
+        elif currentToken["value"] == ";":
+          return True
+      elif currentToken["value"] == "=":
         prox_token()
         if checkValues():
           prox_token()
@@ -154,7 +164,17 @@ def atribuition_var():
 def atribuition_value_optional():
   if currentToken["type"] == "IDE":
       prox_token()
-      if currentToken["value"] == "=":
+      if declaration_vector():
+        if declaration_vector():
+          matrix_assign()
+        else:
+          vector_assign()
+        if currentToken["value"] == ",":
+          prox_token()
+          atribuition_value_optional()
+        elif currentToken["value"] == ";":
+          return True
+      elif currentToken["value"] == "=":
         prox_token()
         if checkValues():
           prox_token()
