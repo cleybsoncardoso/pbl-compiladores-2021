@@ -220,6 +220,8 @@ def declaration_bodyFunction(can_return):
     declaration_if(can_return)
   elif currentToken["value"] == "while":
     declaration_while(can_return)
+  elif currentToken["value"] == "print":
+    declaration_print()
   else:
     assign()
   if not can_return:
@@ -261,6 +263,15 @@ def expression_value():
       else:
         startErrorState("erro ao acessar struct na expressao da linha " + currentToken["line"] +"\n")
         return False
+    elif currentToken["value"] == "(":
+      prox_token()
+      argument_list()
+      if(currentToken["value"] == ")"):
+        prox_token()
+        return True
+      else:
+        startErrorState("erro ao declarar chamada de função na linha " + currentToken["line"] +"\n")
+        return False
     return True
   elif currentToken["type"] in ["NRO", "CAD"] or currentToken["value"] in ["false", "true"]:
     prox_token()
@@ -286,6 +297,7 @@ def function_call():
   if currentToken["type"] == "IDE":
     prox_token()
     if currentToken["value"] == "(":
+      prox_token()
       argument_list()
       if(currentToken["value"] == ")"):
         prox_token()
@@ -529,6 +541,29 @@ def declaration_while(can_return):
         return False
     else:
       startErrorState("erro ao declarar 'if' na linha " + currentToken["line"] +"\n")
+      return False
+
+
+#################### print function #################################
+def declaration_print():
+  if currentToken["value"] == "print":
+    prox_token()
+    if currentToken["value"] == "(":
+      prox_token()
+      argument_list()
+      if currentToken["value"] == ")":
+        prox_token()
+        if currentToken["value"] == ";":
+          prox_token()
+          return True
+        else:
+          startErrorState("erro ao declarar print na linha " + currentToken["line"] +"\n")
+          return False
+      else:
+        startErrorState("erro ao declarar print na linha " + currentToken["line"] +"\n")
+        return False
+    else:
+      startErrorState("erro ao declarar print na linha " + currentToken["line"] +"\n")
       return False
 
 #################### General Functions ###################################################
