@@ -222,6 +222,8 @@ def declaration_bodyFunction(can_return):
     declaration_while(can_return)
   elif currentToken["value"] == "print":
     declaration_print()
+  elif currentToken["value"] == "read":
+    declaration_read()
   else:
     assign()
   if not can_return:
@@ -566,6 +568,40 @@ def declaration_print():
       startErrorState("erro ao declarar print na linha " + currentToken["line"] +"\n")
       return False
 
+#################### read function ####################################
+
+def declaration_read_body():
+  if isAtribuivel():
+    prox_token()
+    if currentToken["value"] == ",":
+      prox_token()
+      return declaration_read_body()
+    elif currentToken["value"] == ")":
+      return True
+  return False
+
+def declaration_read():
+  if currentToken["value"] == "read":
+    prox_token()
+    if currentToken["value"] == "(":
+      prox_token()
+      if not declaration_read_body():
+        startErrorState("erro ao declarar read na linha " + currentToken["line"] +"\n")
+        return False
+      if currentToken["value"] == ")":
+        prox_token()
+        if currentToken["value"] == ";":
+          prox_token()
+          return True
+        else:
+          startErrorState("erro ao declarar read na linha " + currentToken["line"] +"\n")
+          return False
+      else:
+        startErrorState("erro ao declarar read na linha " + currentToken["line"] +"\n")
+        return False
+    else:
+      startErrorState("erro ao declarar read na linha " + currentToken["line"] +"\n")
+      return False
 #################### General Functions ###################################################
 
 def check_declaration_type():
