@@ -298,13 +298,57 @@ def assign():
     if currentToken["value"] == "=":
       prox_token()
       expression()
-    elif currentToken["value"] == "[":
-      
+    if declaration_vector():
+      if declaration_vector():
+        matrix_assign()
+      else:
+        vector_assign()
+
   if currentToken["value"] == ";":
     prox_token()
   else:
     startErrorState("erro em atribuicao na linha " + currentToken["line"] +"\n")
     return False
+
+#################### vector matrix ###################################################
+
+def matrix_assign():
+  print("matrix_assign")
+
+
+def vector_assign():
+  if currentToken["value"] == "=":
+    prox_token()
+    if currentToken["type"] in ["IDE", "NRO", "CAD"] or currentToken["value"] in ["false", "true"]:
+      prox_token()
+      return True
+    elif currentToken["value"] == "{":
+      prox_token()
+      if vector_assign_aux():
+        if currentToken["value"] == "}":
+          prox_token()
+        else:
+          startErrorState("erro em atribuicao de vetor na linha " + currentToken["line"] +"\n")
+          return False
+      else:
+        startErrorState("erro em atribuicao de vetor na linha " + currentToken["line"] +"\n")
+        return False
+    else:
+      startErrorState("erro em atribuicao de vetor na linha " + currentToken["line"] +"\n")
+      return False
+  else:
+    startErrorState("erro em atribuicao de vetor na linha " + currentToken["line"] +"\n")
+    return False
+
+def vector_assign_aux():
+  if currentToken["type"] in ["IDE", "NRO", "CAD"] or currentToken["value"] in ["false", "true"]:
+    prox_token()
+    if currentToken["value"] == ",":
+      prox_token()
+      return vector_assign_aux()
+    else:
+      return True
+  return False
 
 def declaration_vector():
   if currentToken["value"] == "[":

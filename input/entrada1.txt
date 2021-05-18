@@ -25,6 +25,9 @@ procedure acelerar(real velocidade){
     local.a = 15;
     b = 18;
     j = "hello";
+    vetor1[1] = 10;
+    vetor2[b] = { b, j };
+    vetor2[b] = { b };
     if(b > c && c > a || a > b)then{
         carro.velocidade = 200;
         if(carro.placa == "jjj")then{
