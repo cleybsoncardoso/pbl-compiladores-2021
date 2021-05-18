@@ -8,6 +8,7 @@ separeteTokens = re.compile("(\d*) (\w*) (.*)")
 tokens = []
 errors = []
 currentToken = None
+calledStart = False
 
 def main():
   inputs_diretory = "./output_lexical"
@@ -70,6 +71,12 @@ def global_declarations():
       elif currentToken["value"] == "procedure":
         prox_token()
         declaration_procedure()
+      elif currentToken["value"] == "function":
+        prox_token()
+        declaration_function()
+      elif currentToken["value"] == "start":
+        prox_token()
+        declaration_start()
       else:
         prox_token()
     else:
@@ -77,6 +84,27 @@ def global_declarations():
     global_declarations()
 
 
+################ start ##############################
+def declaration_start():
+  global calledStart
+
+  if calledStart:
+    startErrorState("exist 2 start function, line: " + currentToken["line"] +"\n")
+  else:
+    calledStart = True
+    if currentToken["value"] == "(":
+      prox_token()
+      if currentToken["value"] == ")":
+        prox_token()
+        if currentToken["value"] == "{":
+          prox_token()
+          declaration_bodyFunction(False)
+        else:
+          startErrorState("error on start function, line: " + currentToken["line"] +"\n")
+      else:
+        startErrorState("error on start function, line: " + currentToken["line"] +"\n")
+    else:
+      startErrorState("error on start function, line: " + currentToken["line"] +"\n")
 
 ################# const ##############################
 
@@ -142,11 +170,6 @@ def declaration_var():
     prox_token()
     if currentToken["value"] != "}":
       atribuition_var()
-    # if currentToken["value"] != "}":
-    #   if atribuition_var():
-    #     print("declarou Variavel")
-    #   else:
-    #     print("erro: Declarar Variavel " + currentToken["value"] + " linha:" + currentToken["line"])
   if currentToken["value"] == "}":
     prox_token()
 
@@ -198,6 +221,23 @@ def atribuition_value_optional():
   return False
 
 
+#################### functions #######################################################
+def declaration_function():
+  if check_declaration_type():
+    prox_token()
+  elif currentToken["value"] == "void":
+    prox_token()
+
+  if currentToken["type"] == "IDE":
+    prox_token()
+    if currentToken["value"] == "(":
+      prox_token()
+      if declaration_params():
+        prox_token()
+        if currentToken["value"] == "{":
+          prox_token()
+          declaration_bodyFunction(True)
+
 #################### procedure #######################################################
 
 def declaration_procedure():
@@ -230,8 +270,32 @@ def declaration_bodyFunction(can_return):
     if currentToken["value"] != "}":
       declaration_bodyFunction(can_return)
   else:
-    if currentToken["value"] != "}" or currentToken["value"] != "return":
+    if currentToken["value"] != "}" and currentToken["value"] != "return":
       declaration_bodyFunction(can_return)
+    elif currentToken["value"] == "return":
+      prox_token()
+      return_state()
+
+def return_state():
+  if currentToken["value"] == ";":
+    prox_token()
+    return True
+  expression()
+  if declaration_vector():
+    if declaration_vector():
+      matrix_assign()
+    else:
+      vector_assign()
+
+  if currentToken["value"] == "(":
+    prox_token()
+    argument_list()
+    if(currentToken["value"] == ")"):
+      prox_token()
+      return True
+    else:
+      startErrorState("erro ao declarar chamada de função na linha " + currentToken["line"] +"\n")
+      return False
 
 def global_local():
   if currentToken["type"] == "PRE":
