@@ -313,7 +313,19 @@ def assign():
 #################### vector matrix ###################################################
 
 def matrix_assign():
-  print("matrix_assign")
+  if currentToken["value"] == "=":
+    prox_token()
+    if currentToken["type"] in ["IDE", "NRO", "CAD"] or currentToken["value"] in ["false", "true"]:
+      prox_token()
+      return True
+    else:
+      startErrorState("erro em atribuicao de matrix na linha " + currentToken["line"] +"\n")
+      return False
+  elif currentToken["value"] == ";":
+    return True
+  else:
+    startErrorState("erro em atribuicao de matrix na linha " + currentToken["line"] +"\n")
+    return False
 
 
 def vector_assign():
@@ -336,6 +348,8 @@ def vector_assign():
     else:
       startErrorState("erro em atribuicao de vetor na linha " + currentToken["line"] +"\n")
       return False
+  elif currentToken["value"] == ";":
+    return True
   else:
     startErrorState("erro em atribuicao de vetor na linha " + currentToken["line"] +"\n")
     return False

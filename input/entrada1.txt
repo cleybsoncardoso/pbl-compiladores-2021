@@ -25,6 +25,10 @@ procedure acelerar(real velocidade){
     local.a = 15;
     b = 18;
     j = "hello";
+    vetor1[1];
+    vetor1[1][2];
+    vetor1[1][2] = b;
+    vetor1[1][b] = 5;
     vetor1[1] = 10;
     vetor2[b] = { b, j };
     vetor2[b] = { b };
