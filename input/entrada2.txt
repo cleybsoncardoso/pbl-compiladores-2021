@@ -137,6 +137,3 @@ function boolean ligado(boolean ligado, string nome, int ano){
     acelerar(x);
     return true;
 }
-
-typedef struct Uno extends Carro {
-}

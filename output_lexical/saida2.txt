@@ -755,10 +755,3 @@
 138 PRE true
 138 DEL ;
 139 DEL }
-141 PRE typedef
-141 PRE struct
-141 IDE Uno
-141 PRE extends
-141 IDE Carro
-141 DEL {
-142 DEL }

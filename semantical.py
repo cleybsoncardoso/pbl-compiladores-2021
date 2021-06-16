@@ -1017,15 +1017,17 @@ def main():
   global errors
   global currentToken
   global calledStart
+  global semantical_errors
 
   inputs_diretory = "./input"
   output_diretory = "./output_lexical"
 
-  for input_file in ["entrada1.txt"]:
+  for input_file in os.listdir(inputs_diretory):
     tokens = []
     errors = []
     currentToken = None
     calledStart = False
+    semantical_errors = []
 
 
     lexical_tokens_file = lexical(input_file)
@@ -1045,7 +1047,6 @@ def main():
     with open((inputs_diretory+"/"+lexical_tokens_file), "r") as input_file_stream:
       convert_tokens(input_file_stream)
     analise_sintatical()
-    analise_semantical(file_number)
 
     if len(errors) > 0 or not calledStart:
       with open((output_diretory+"/saida"+file_number+".txt"), "w") as output_file_stream:
@@ -1054,22 +1055,18 @@ def main():
         if not calledStart:
           output_file_stream.write("start não foi criado")
     else:
-      with open((output_diretory+"/saida"+file_number+".txt"), "w") as output_file_stream:
-        output_file_stream.write("Sucesso")
+      analise_semantical(file_number)
 
 def analise_semantical(file_number):
   output_diretory = "output"
-  print(indexabel_table)
-  print("---------------------------------------------")
-  print(semantical_errors)
   if len(semantical_errors) > 0:
-    with open((output_diretory+"/saidasemantical"+file_number+".txt"), "w") as output_file_stream:
+    with open((output_diretory+"/saida"+file_number+".txt"), "w") as output_file_stream:
       for error in semantical_errors:
         output_file_stream.write(error)
       if not calledStart:
         output_file_stream.write("start não foi criado")
   else:
-    with open((output_diretory+"/saidasemantical"+file_number+".txt"), "w") as output_file_stream:
+    with open((output_diretory+"/saida"+file_number+".txt"), "w") as output_file_stream:
       output_file_stream.write("Sucesso")
 
 #############################################################################################

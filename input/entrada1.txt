@@ -1,14 +1,14 @@
 const{
     real a = 2, b = 4, c = 3;
-    boolean teste = false;
-    int x = 46;
+    boolean teste = "teste";
+    int x = 4.6;
     string y = "4";
     boolean z = true;
     int d[1] = {2, 3};
 }
 var {
     boolean teste1 = false;
-    int x2;
+    int a;
     int a1[1] = {2, 3};
     int a1[1][2] = 2;
     int a1[1];
@@ -25,7 +25,6 @@ procedure acelerar(real velocidade){
         real a, b, c = 3;
         boolean teste = false;
         int x;
-        string j;
         struct Carro carro;
         string vetor1, vetor2;
     }
@@ -40,8 +39,6 @@ procedure acelerar(real velocidade){
     vetor1[1] = 10;
     vetor2[b] = { b, j };
     vetor2[b] = { b };
-    if(b > c || c > a && a > b)then{
-    }
     acelerar(x);
 
     while(b > c && c > a && a > b){
