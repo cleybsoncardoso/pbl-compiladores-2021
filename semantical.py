@@ -37,11 +37,13 @@ calledStart = False
 
 # variable to semantical
 indexabel_table = {
-  "global": {}
+  "global": {},
+  "start": {}
 }
 current_scope = "global"
 semantical_errors = []
 desconsidere_scope = False
+is_global = False
 
 
 
@@ -254,6 +256,9 @@ def global_declarations():
 ################ start ##############################
 def declaration_start():
   global calledStart
+  global current_scope
+
+  current_scope = "start"
 
   if calledStart:
     startErrorState("exist 2 start function, line: " + currentToken["line"] +"\n")
@@ -306,13 +311,17 @@ def atribuition_value(type):
   global semantical_errors
 
   if currentToken["type"] == "IDE":
+    hasError = False
     if not desconsidere_scope:
       if currentToken["value"] in indexabel_table[current_scope]:
         semantical_errors.append("Erro na linha " + currentToken["line"] + ", constante '" + currentToken["value"] + "' ja foi declarada\n")
+        hasError = True
       else:
         indexabel_table[current_scope][currentToken["value"]] = {
           "type": type
         }
+    else:
+      hasError = True
     prox_token()
     if declaration_vector():
       if declaration_vector():
@@ -326,7 +335,7 @@ def atribuition_value(type):
         return True
     elif currentToken["value"] == "=":
       prox_token()
-      if checkValues():
+      if checkValues(type, hasError):
         prox_token()
         if currentToken["value"] == ",":
           prox_token()
@@ -368,13 +377,17 @@ def atribuition_value_optional(type):
   global semantical_errors
 
   if currentToken["type"] == "IDE":
+    hasError = False
     if not desconsidere_scope:
       if currentToken["value"] in indexabel_table[current_scope]:
         semantical_errors.append("Erro na linha " + currentToken["line"] + ", variavel '" + currentToken["value"] + "' ja foi declarada\n")
+        hasError = True
       else:
         indexabel_table[current_scope][currentToken["value"]] = {
           "type": type
         }
+    else:
+      hasError = True
     prox_token()
     if declaration_vector():
       if declaration_vector():
@@ -388,7 +401,7 @@ def atribuition_value_optional(type):
         return True
     elif currentToken["value"] == "=":
       prox_token()
-      if checkValues():
+      if checkValues(type, hasError):
         prox_token()
         if currentToken["value"] == ",":
           prox_token()
@@ -415,7 +428,6 @@ def atribuition_value_optional(type):
 def declaration_function():
   global indexabel_table
   global semantical_errors
-  global current_scope
   global desconsidere_scope
 
   return_type = currentToken["value"]
@@ -426,19 +438,11 @@ def declaration_function():
     prox_token()
 
   if currentToken["type"] == "IDE":
-    if currentToken["value"] in indexabel_table:
-      semantical_errors.append("Erro na linha " + currentToken["line"] + ", função '" + currentToken["value"] + "' ja foi declarada\n")
-      desconsidere_scope = True
-    else:
-      indexabel_table[currentToken["value"]] = {
-        "return": return_type
-      }
-      current_scope = currentToken["value"]
-
+    function_name = currentToken["value"]
     prox_token()
     if currentToken["value"] == "(":
       prox_token()
-      if declaration_params():
+      if declaration_params(function_name, return_type, [], {}):
         prox_token()
         if currentToken["value"] == "{":
           prox_token()
@@ -449,21 +453,15 @@ def declaration_function():
 def declaration_procedure():
   global indexabel_table
   global semantical_errors
-  global current_scope
   global desconsidere_scope
 
   if currentToken["type"] == "IDE":
-    if currentToken["value"] in indexabel_table:
-      semantical_errors.append("Erro na linha " + currentToken["line"] + ", procedure '" + currentToken["value"] + "' ja foi declarada\n")
-      desconsidere_scope = True
-    else:
-      indexabel_table[currentToken["value"]] = { }
-      current_scope = currentToken["value"]
+    function_name = currentToken["value"]
 
     prox_token()
     if currentToken["value"] == "(":
       prox_token()
-      if declaration_params():
+      if declaration_params(function_name, None, [], {}):
         prox_token()
         if currentToken["value"] == "{":
           prox_token()
@@ -516,8 +514,11 @@ def return_state():
       return False
 
 def global_local():
+  global is_global
+
   if currentToken["type"] == "PRE":
     if currentToken["value"] == "global" or currentToken["value"] == "local":
+      is_global = currentToken["value"] == "global"
       prox_token()
       if currentToken["value"] == ".":
         prox_token()
@@ -618,11 +619,23 @@ def add_expression():
     return True
 
 def assign():
+  global is_global
+  global semantical_errors
+
+  is_global = False
   if not global_local():
     return False
 
   if currentToken["type"] == "IDE":
+    old_token = currentToken["value"]
     prox_token()
+    variable_type = None
+    if currentToken["value"] != "(":
+      if old_token in indexabel_table["global" if is_global == True else current_scope]:
+        variable_type = indexabel_table["global" if is_global == True else current_scope][old_token]["type"]
+      else:
+        semantical_errors.append("Erro na linha " + currentToken["line"] + ", a variavel '" + old_token + "' nao foi declarada\n")
+
     if currentToken["value"] == ".":
       prox_token()
       if currentToken["type"] == "IDE":
@@ -908,18 +921,42 @@ def check_declaration_type():
       return True
   return False
 
-def declaration_params():
+def declaration_params(function_name, return_type, params_list, obj_params):
+  global desconsidere_scope
+  global semantical_errors
+  global current_scope
+
   if currentToken["value"] == ")":
+    index_value = function_name + ("" if len(params_list) == 0 else "_" + "_".join(params_list))
+    current_scope = index_value
+    if index_value in indexabel_table:
+      semantical_errors.append("Erro na linha " + currentToken["line"] + ", função/procedure '" + function_name + "' ja foi declarada\n")
+      desconsidere_scope = True
+    else:
+      indexabel_table[index_value] = {
+        "return": return_type,
+        **obj_params
+      }
     return True
   if currentToken["value"] == "const":
     prox_token()
   if check_declaration_type():
+    params_list.append(currentToken["value"])
+    obj_type = currentToken["value"]
     prox_token()
     if currentToken["type"] == "IDE":
+      if not desconsidere_scope:
+        if currentToken["value"] in obj_params:
+          semantical_errors.append("Erro na linha " + currentToken["line"] + ", parametro da função/procedure '" + function_name + "' ja foi declarada\n")
+          desconsidere_scope = True
+        else:
+          obj_params[currentToken["value"]] = {
+            "type": obj_type
+          }
       prox_token()
       if currentToken["value"] == ",":
         prox_token()
-      return declaration_params()
+      return declaration_params(function_name, return_type, params_list, obj_params)
     startErrorState("erro ao declarar paramentos em função/procedure na linha " + currentToken["line"] +"\n")
     return False
   startErrorState("erro ao declarar paramentos em função/procedure na linha " + currentToken["line"] +"\n")
@@ -935,10 +972,22 @@ def startErrorState(messageError):
   errors.append(messageError)
   errorState()
 
-def checkValues():
+def checkValues(type, hasError):
+  global semantical_errors
+
   possibleValue = ["false", "true"]
   possibleType = ["NRO", "CAD"]
   if currentToken["value"] in possibleValue or currentToken["type"] in possibleType:
+    if not hasError:
+      if type == "string" and currentToken["type"] != "CAD":
+        semantical_errors.append("Erro na linha " + currentToken["line"] + ", esperava string e encontrou: " + currentToken["value"] + "\n")
+      elif type == "boolean" and currentToken["value"] not in possibleValue:
+        semantical_errors.append("Erro na linha " + currentToken["line"] + ", esperava boolean e encontrou: " + currentToken["value"] + "\n")
+      elif type == "real" and currentToken["type"] != "NRO":
+        semantical_errors.append("Erro na linha " + currentToken["line"] + ", esperava real e encontrou: " + currentToken["value"] + "\n")
+      elif type == "int" and currentToken["type"] != "NRO" or type == "int" and currentToken["type"] == "NRO" and "." in currentToken["value"]:
+        semantical_errors.append("Erro na linha " + currentToken["line"] + ", esperava int e encontrou: " + currentToken["value"] + "\n")
+
     return True
   return False
 
@@ -996,7 +1045,7 @@ def main():
     with open((inputs_diretory+"/"+lexical_tokens_file), "r") as input_file_stream:
       convert_tokens(input_file_stream)
     analise_sintatical()
-    analise_semantical()
+    analise_semantical(file_number)
 
     if len(errors) > 0 or not calledStart:
       with open((output_diretory+"/saida"+file_number+".txt"), "w") as output_file_stream:
@@ -1008,11 +1057,22 @@ def main():
       with open((output_diretory+"/saida"+file_number+".txt"), "w") as output_file_stream:
         output_file_stream.write("Sucesso")
 
-def analise_semantical():
+def analise_semantical(file_number):
+  output_diretory = "output"
   print(indexabel_table)
   print("---------------------------------------------")
   print(semantical_errors)
+  if len(semantical_errors) > 0:
+    with open((output_diretory+"/saidasemantical"+file_number+".txt"), "w") as output_file_stream:
+      for error in semantical_errors:
+        output_file_stream.write(error)
+      if not calledStart:
+        output_file_stream.write("start não foi criado")
+  else:
+    with open((output_diretory+"/saidasemantical"+file_number+".txt"), "w") as output_file_stream:
+      output_file_stream.write("Sucesso")
 
+#############################################################################################
 
 
 if __name__ == "__main__":
